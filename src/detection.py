@@ -1,34 +1,21 @@
-import cv2
-
-
+import cv2 #OpenCV
 def load_face_detector(cascade_path: str) -> cv2.CascadeClassifier:
-    cascade = cv2.CascadeClassifier(cascade_path)
+    cascade = cv2.CascadeClassifier(cascade_path) # Charge la cascade visage
     if cascade.empty():
-        raise FileNotFoundError(f"Cascade introuvable ou invalide: {cascade_path}")
-    return cascade
-
-
-def detect_faces(frame, cascade: cv2.CascadeClassifier):
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = cascade.detectMultiScale(
-        gray_frame,
-        scaleFactor=1.1,
-        minNeighbors=5,
-        minSize=(60, 60),
-    )
-    return faces
-
-
-def draw_faces(frame, faces, label: str = "Visage"):
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.putText(
-            frame,
-            label,
-            (x, y - 10),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (0, 255, 0),
-            2,
-        )
-    return frame
+        raise FileNotFoundError("Cascade visage introuvable") # Erreur chargement
+    return cascade  # Retourne le détecteur
+def load_smile_detector(cascade_path: str) -> cv2.CascadeClassifier:
+    cascade = cv2.CascadeClassifier(cascade_path) # Charge la cascade sourire
+    if cascade.empty():
+        raise FileNotFoundError("Cascade sourire introuvable")  # Erreur chargement
+    return cascade # Retourne le détecteur
+def detect_faces(frame, cascade):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # Image en niveaux de gris
+    faces = cascade.detectMultiScale(gray, 1.1, 5, minSize=(60, 60)) # Détection visage
+    return faces  # Liste des visages détectés
+def detect_smiles(frame, smile_cascade, face):
+    x, y, w, h = face  # Coordonnées du visage
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # Image grise
+    roi = gray[y:y+h, x:x+w]  # Zone du visage
+    smiles = smile_cascade.detectMultiScale(roi, 1.7, 20) # Détection sourire
+    return smiles  # Liste des sourires
